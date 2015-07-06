@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.wso2.emm.agent.R;
 import org.wso2.emm.agent.proxy.APIResultCallBack;
 import org.wso2.emm.agent.utils.CommonUtilities;
+import org.wso2.emm.agent.utils.Logs;
 import org.wso2.emm.agent.utils.ServerUtils;
 
 import android.app.admin.DeviceAdminReceiver;
@@ -62,6 +63,7 @@ public class WSO2DeviceAdminReceiver extends DeviceAdminReceiver implements APIR
 		editor.commit();
 		
 		ProcessMessage pm=new ProcessMessage(context);
+		
 		pm.getOperations(null);
 		try {	
 			policy = mainPref.getString("policy", "");

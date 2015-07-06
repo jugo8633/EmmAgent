@@ -24,6 +24,7 @@ import org.wso2.emm.agent.services.Operation;
 import org.wso2.emm.agent.services.WSO2DeviceAdminReceiver;
 import org.wso2.emm.agent.utils.CommonDialogUtils;
 import org.wso2.emm.agent.utils.CommonUtilities;
+import org.wso2.emm.agent.utils.Logs;
 import org.wso2.emm.agent.utils.ServerUtils;
 
 import android.app.AlertDialog;
@@ -98,6 +99,7 @@ public class AlreadyRegisteredActivity extends SherlockActivity implements APIRe
 					R.string.intent_extra_fresh_reg_flag))) {
 				freshRegFlag = extras.getBoolean(getResources().getString(
 						R.string.intent_extra_fresh_reg_flag));
+				
 			}
 
 		}

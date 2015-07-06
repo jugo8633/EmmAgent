@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.wso2.emm.agent.R;
 import org.wso2.emm.agent.utils.CommonUtilities;
+import org.wso2.emm.agent.utils.Logs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -79,6 +80,7 @@ public class APIController implements TokenCallBack {
 
 		@Override
 		protected void onPostExecute(Map<String, String> result) {
+			Logs.showTrace("onPostExecute : ##########################################");
 			apiResultCallBack.onReceiveAPIResult(result, IdentityProxy.getInstance()
 			                                                          .getRequestCode());
 		}

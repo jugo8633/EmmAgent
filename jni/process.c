@@ -11,7 +11,7 @@ long ps_list_count()
 
 int ps_dump()
 {
-	//__android_log_print(ANDROID_LOG_INFO, "JNIMsg", "run JNI function:  %s ",	"ps_dump");
+	__android_log_print(ANDROID_LOG_INFO, "JNIMsg", "run JNI function:  %s ",	"ps_dump");
 
 	ps_list_empty(&work_ps_list);
 
@@ -39,7 +39,7 @@ int ps_dump()
 
 void ps_list_add(process_info *new_ps)
 {
-	//__android_log_print(ANDROID_LOG_INFO, "JNIMsg", "run JNI function:  %s ",	"ps_list_add");
+	__android_log_print(ANDROID_LOG_INFO, "JNIMsg", "run JNI function:  %s ",	"ps_list_add");
 
 	process_info *new_node = (process_info *) malloc(sizeof(process_info));
 
@@ -64,7 +64,7 @@ void ps_list_add(process_info *new_ps)
 
 void ps_instance_dump(int pid)
 {
-	//__android_log_print(ANDROID_LOG_INFO, "JNIMsg", "run JNI function:  %s ",	"ps_instance_dump");
+	__android_log_print(ANDROID_LOG_INFO, "JNIMsg", "run JNI function:  %s ",	"ps_instance_dump");
 
 	char statline[BUFFERSIZE * 2];
 	struct stat stats;

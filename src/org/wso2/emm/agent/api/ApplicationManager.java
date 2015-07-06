@@ -12,7 +12,7 @@
  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
-*/
+ */
 package org.wso2.emm.agent.api;
 
 import java.io.ByteArrayOutputStream;
@@ -27,6 +27,7 @@ import java.util.List;
 import org.wso2.emm.agent.R;
 import org.wso2.emm.agent.models.PInfo;
 import org.wso2.emm.agent.utils.CommonUtilities;
+import org.wso2.emm.agent.utils.Logs;
 
 import android.content.Context;
 import android.content.Intent;
@@ -43,40 +44,70 @@ import android.provider.Browser;
 import android.util.Base64;
 import android.util.Log;
 
-public class ApplicationManager {
-	Context context = null;
+public class ApplicationManager
+{
+	Context	context	= null;
 
-	public ApplicationManager(Context context) {
+	public ApplicationManager(Context context)
+	{
 		this.context = context;
 	}
 
 	/**
 	 * Returns a list of all the applications installed on the device
 	 */
-	public String[] getApplicationListasArray() {
+	public String[] getApplicationListasArray()
+	{
 		PackageManager pm = context.getPackageManager();
 		List<ApplicationInfo> apps = pm.getInstalledApplications(0);
 		String applicationNames[] = new String[apps.size()];
-		for (int j = 0; j < apps.size(); j++) {
+		for (int j = 0; j < apps.size(); j++)
+		{
 			applicationNames[j] = apps.get(j).packageName;
 		}
 		return applicationNames;
 	}
 
-	public ArrayList<PInfo> getInstalledApps(boolean getSysPackages) {
+	public ArrayList<PInfo> getRunningApps()
+	{
 		ArrayList<PInfo> res = new ArrayList<PInfo>();
-		List<PackageInfo> packs = context.getPackageManager()
-				.getInstalledPackages(0);
-		for (int i = 0; i < packs.size(); i++) {
+		List<PackageInfo> packs = context.getPackageManager().getInstalledPackages(0);
+
+		JNIInterface jniinterface = JNIInterface.getInstance();
+		int nCount = jniinterface.doDataLoad(1);
+		Logs.showTrace(String.format("process count:%d  #####################", nCount));
+		String[] strProcList = null;
+		for (int i = 0; i < nCount; ++i)
+		{
+			strProcList = jniinterface.GetProcessInfo(i);
+			Logs.showTrace("Process Name: " + strProcList[0] + " Status: " + strProcList[1]);
+			if (strProcList[1].trim().equalsIgnoreCase("R"))
+			{
+				PInfo newInfo = new PInfo();
+				newInfo.appname = strProcList[0] + " : " + strProcList[1];
+				newInfo.pname = strProcList[0];
+				newInfo.icon = "";
+				res.add(newInfo);
+			}
+		}
+		return res;
+	}
+
+	public ArrayList<PInfo> getInstalledApps(boolean getSysPackages)
+	{
+		ArrayList<PInfo> res = new ArrayList<PInfo>();
+		List<PackageInfo> packs = context.getPackageManager().getInstalledPackages(0);
+		for (int i = 0; i < packs.size(); i++)
+		{
 			PackageInfo p = packs.get(i);
 			ApplicationInfo a = p.applicationInfo;
 			//if ((!getSysPackages) && (p.versionName == null)) {
-			if ((!getSysPackages) &&  ((a.flags & ApplicationInfo.FLAG_SYSTEM) == 1)) {
+			if ((!getSysPackages) && ((a.flags & ApplicationInfo.FLAG_SYSTEM) == 1))
+			{
 				continue;
 			}
 			PInfo newInfo = new PInfo();
-			newInfo.appname = p.applicationInfo.loadLabel(
-					context.getPackageManager()).toString();
+			newInfo.appname = p.applicationInfo.loadLabel(context.getPackageManager()).toString();
 			newInfo.pname = p.packageName;
 			//newInfo.pname = "";
 			newInfo.versionName = p.versionName;
@@ -88,27 +119,30 @@ public class ApplicationManager {
 		}
 		return res;
 	}
-	
-	public String getAppNameFromPackage(String packageName) {
+
+	public String getAppNameFromPackage(String packageName)
+	{
 		boolean getSysPackages = true;
 		String appName = "";
-		List<PackageInfo> packs = context.getPackageManager()
-				.getInstalledPackages(0);
-		for (int i = 0; i < packs.size(); i++) {
+		List<PackageInfo> packs = context.getPackageManager().getInstalledPackages(0);
+		for (int i = 0; i < packs.size(); i++)
+		{
 			PackageInfo p = packs.get(i);
-			if ((!getSysPackages) && (p.versionName == null)) {
+			if ((!getSysPackages) && (p.versionName == null))
+			{
 				continue;
 			}
-			
-			if(packageName.equals(p.packageName)){
-				appName = p.applicationInfo.loadLabel(
-						context.getPackageManager()).toString();
+
+			if (packageName.equals(p.packageName))
+			{
+				appName = p.applicationInfo.loadLabel(context.getPackageManager()).toString();
 			}
 		}
 		return appName;
 	}
 
-	public String encodeImage(Drawable drawable) {
+	public String encodeImage(Drawable drawable)
+	{
 		Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
 		// Bitmap bitmap =
 		// ((BitmapDrawable)context.getResources().getDrawable(R.drawable.dot)).getBitmap();
@@ -132,7 +166,8 @@ public class ApplicationManager {
 	 * @param url
 	 *            - APK Url should be passed in as a String
 	 */
-	public void installApp(String url) {
+	public void installApp(String url)
+	{
 		UpdateApp updator = new UpdateApp();
 		updator.setContext(context);
 		updator.execute(url);
@@ -148,7 +183,8 @@ public class ApplicationManager {
 														// Uninstall.
 	{
 		// Uri packageURI = Uri.parse("package:com.CheckInstallApp");
-		if (!packageName.contains(context.getResources().getString(R.string.application_package_prefix))) {
+		if (!packageName.contains(context.getResources().getString(R.string.application_package_prefix)))
+		{
 			packageName = context.getResources().getString(R.string.application_package_prefix) + packageName;
 		}
 		Uri packageURI = Uri.parse(packageName.toString());
@@ -156,7 +192,7 @@ public class ApplicationManager {
 		uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(uninstallIntent);
 	}
-	
+
 	/**
 	 * Creates a webclip on the device home screen
 	 * 
@@ -164,22 +200,21 @@ public class ApplicationManager {
 	 *            - Url should be passed in as a String
 	 *            - Title(Web app title) should be passed in as a String
 	 */
-	public void createWebAppBookmark(String url, String title){
-		  final Intent in = new Intent();
-		  final Intent shortcutIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-		  long urlHash = url.hashCode();
-		  long uniqueId = (urlHash << 32) | shortcutIntent.hashCode();
-		  shortcutIntent.putExtra(Browser.EXTRA_APPLICATION_ID, Long.toString(uniqueId));
-		  in.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-		  in.putExtra(Intent.EXTRA_SHORTCUT_NAME, title);
-		  in.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
-		                    Intent.ShortcutIconResource.fromContext(
-		                            context,
-		                            R.drawable.ic_bookmark));
-		  in.setAction(context.getResources().getString(R.string.application_package_launcher_action)); 
+	public void createWebAppBookmark(String url, String title)
+	{
+		final Intent in = new Intent();
+		final Intent shortcutIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+		long urlHash = url.hashCode();
+		long uniqueId = (urlHash << 32) | shortcutIntent.hashCode();
+		shortcutIntent.putExtra(Browser.EXTRA_APPLICATION_ID, Long.toString(uniqueId));
+		in.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+		in.putExtra(Intent.EXTRA_SHORTCUT_NAME, title);
+		in.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
+				Intent.ShortcutIconResource.fromContext(context, R.drawable.ic_bookmark));
+		in.setAction(context.getResources().getString(R.string.application_package_launcher_action));
 		//or   in.setAction(Intent.ACTION_CREATE_SHORTCUT); 
 
-		  context.sendBroadcast(in);
+		context.sendBroadcast(in);
 	}
 
 	/**
@@ -188,28 +223,34 @@ public class ApplicationManager {
 	 * @param url
 	 *            - APK Url should be passed in as a String
 	 */
-	public class UpdateApp extends AsyncTask<String, Void, Void> {
-		private Context context;
+	public class UpdateApp extends AsyncTask<String, Void, Void>
+	{
+		private Context	context;
 
-		public void setContext(Context contextf) {
+		public void setContext(Context contextf)
+		{
 			context = contextf;
 		}
 
 		@Override
-		protected Void doInBackground(String... arg0) {
-			try {
+		protected Void doInBackground(String... arg0)
+		{
+			try
+			{
 				URL url = new URL(arg0[0]);
 				HttpURLConnection c = (HttpURLConnection) url.openConnection();
 				c.setRequestMethod(context.getResources().getString(R.string.server_util_req_type_get));
 				c.setDoOutput(true);
 				c.connect();
 
-				String PATH = Environment.getExternalStorageDirectory()
-						.getPath() + context.getResources().getString(R.string.application_mgr_download_location);
+				String PATH = Environment.getExternalStorageDirectory().getPath()
+						+ context.getResources().getString(R.string.application_mgr_download_location);
 				File file = new File(PATH);
 				file.mkdirs();
-				File outputFile = new File(file, context.getResources().getString(R.string.application_mgr_download_file_name));
-				if (outputFile.exists()) {
+				File outputFile = new File(file, context.getResources().getString(
+						R.string.application_mgr_download_file_name));
+				if (outputFile.exists())
+				{
 					outputFile.delete();
 				}
 				FileOutputStream fos = new FileOutputStream(outputFile);
@@ -218,7 +259,8 @@ public class ApplicationManager {
 
 				byte[] buffer = new byte[1024];
 				int len1 = 0;
-				while ((len1 = is.read(buffer)) != -1) {
+				while ((len1 = is.read(buffer)) != -1)
+				{
 					fos.write(buffer, 0, len1);
 				}
 				fos.close();
@@ -226,13 +268,17 @@ public class ApplicationManager {
 
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				intent.setDataAndType(
-						Uri.fromFile(new File(PATH + context.getResources().getString(R.string.application_mgr_download_file_name))),
+						Uri.fromFile(new File(PATH
+								+ context.getResources().getString(R.string.application_mgr_download_file_name))),
 						context.getResources().getString(R.string.application_mgr_mime));
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(intent);
 
-			} catch (Exception e) {
-				if(CommonUtilities.DEBUG_MODE_ENABLED){
+			}
+			catch (Exception e)
+			{
+				if (CommonUtilities.DEBUG_MODE_ENABLED)
+				{
 					Log.e("UpdateAPP", "Update error! " + e.getMessage());
 				}
 			}

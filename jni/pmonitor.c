@@ -64,7 +64,7 @@ static jobjectArray PS_Info(JNIEnv* env, jobject thiz, jint position)
 }
 
 /**  JNI Load and UnLoad **/
-static const char *classPathName = "dev/jugo/processmonitor/JNIInterface";
+static const char *classPathName = "org/wso2/emm/agent/api/JNIInterface";
 static JNINativeMethod gMethods[] =
 {
 { "doDataLoad", "(I)I", Data_Load },

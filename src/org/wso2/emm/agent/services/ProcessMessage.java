@@ -28,6 +28,7 @@ import org.wso2.emm.agent.proxy.APIResultCallBack;
 import org.wso2.emm.agent.utils.CommonDialogUtils;
 import org.wso2.emm.agent.utils.CommonUtilities;
 import org.wso2.emm.agent.utils.LoggerCustom;
+import org.wso2.emm.agent.utils.Logs;
 import org.wso2.emm.agent.utils.ServerUtils;
 
 import android.app.AlertDialog;
@@ -102,6 +103,7 @@ public class ProcessMessage  implements APIResultCallBack{
         				   						CommonUtilities.POST_METHOD, requestParams,
         				   						ProcessMessage.this,
         				   						CommonUtilities.NOTIFICATION_REQUEST_CODE);
+        				Logs.showTrace("callSecuredAPI:" + replyData + "#########################");
         				
         			} catch (Exception e) {
         				e.printStackTrace();

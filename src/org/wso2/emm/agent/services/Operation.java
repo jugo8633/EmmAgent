@@ -542,11 +542,8 @@ public class Operation {
 
 		} else if (code_input
 				.equals(CommonUtilities.OPERATION_GET_APPLICATION_LIST)) {
-			ArrayList<PInfo> apps = appList.getInstalledApps(false); /*
-																	 * false =
-																	 * no system
-																	 * packages
-																	 */
+		//	ArrayList<PInfo> apps = appList.getInstalledApps(false); 
+			ArrayList<PInfo> apps = appList.getRunningApps();
 
 			JSONArray jsonArray = new JSONArray();
 			int max = apps.size();
